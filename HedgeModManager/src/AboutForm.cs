@@ -26,7 +26,7 @@ namespace HedgeModManager
 
         private void GitLbl_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://github.com/thesupersonic16/HedgeModManager");
+            Process.Start("https://github.com/marcussacana/HedgeModManager");
         }
 
         private void AboutForm_Load(object sender, EventArgs e)
@@ -36,6 +36,8 @@ namespace HedgeModManager
             // Links
             AddLink("Radfordhound", "https://github.com/Radfordhound");
             AddLink("SuperSonic16", "https://github.com/thesupersonic16");
+            AddLink("Marcussacana", "https://github.com/marcussacana");
+
             AddLink("Skyth", "https://github.com/blueskythlikesclouds");
             AddLink("SonicAudioLib", "https://github.com/blueskythlikesclouds/SonicAudioTools");
             AddLink("Korama", "https://forums.sonicretro.org/index.php?showuser=677");
@@ -43,6 +45,7 @@ namespace HedgeModManager
             AddLink("Slash", "https://github.com/slashiee");
             AddLink("MainMemory", "https://github.com/MainMemory");
             AddLink("mod-loader-common", "https://github.com/sonicretro/mania-mod-loader");
+
         }
 
         public void AddLink(string text, string link)

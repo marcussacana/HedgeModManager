@@ -572,19 +572,19 @@ namespace HedgeModManager
             if (File.Exists(LWExecutablePath))
             {
                 AddMessage("Starting Sonic Lost World...");
-                Process.Start("steam://rungameid/329440");
+                Process.Start(LWExecutablePath);
                 if (!KeepModLoaderOpenCheckBox.Checked) Close();
             }
             else if (File.Exists(GensExecutablePath))
             {
                 AddMessage("Starting Sonic Generations...");
-                Process.Start("steam://rungameid/71340");
+                Process.Start(GensExecutablePath);
                 if (!KeepModLoaderOpenCheckBox.Checked) Close();
             }
             else if (File.Exists(ForcesExecutablePath))
             {
                 AddMessage("Starting Sonic Forces...");
-                Process.Start("steam://rungameid/637100");
+                Process.Start(ForcesExecutablePath);
                 if (!KeepModLoaderOpenCheckBox.Checked) Close();
             }
         }
@@ -708,7 +708,7 @@ namespace HedgeModManager
 
         public bool DownloadCodes()
         {
-            string URL = $"https://raw.githubusercontent.com/thesupersonic16/HedgeModManager/master/HedgeModManager/res/codes/{Program.CurrentGame}.xml";
+            string URL = $"https://raw.githubusercontent.com/marcussacana/HedgeModManager/master/HedgeModManager/res/codes/{Program.CurrentGame}.xml";
             string filePath = Path.Combine(Program.StartDirectory, "mods\\Codes.xml");
             if (Program.CurrentGame.HasCustomLoader)
             {
@@ -808,7 +808,7 @@ namespace HedgeModManager
                 LogFile.AddMessage("Checking for Updates...");
 
                 var webClient = new WebClient();
-                string url = "https://api.github.com/repos/thesupersonic16/HedgeModManager/releases";
+                string url = "https://api.github.com/repos/marcussacana/HedgeModManager/releases";
                 string data = "";
                 string updateUrl = "";
                 string releaseBody = "";
@@ -817,6 +817,13 @@ namespace HedgeModManager
 
                 webClient.Headers.Add("user-agent", Program.UserAgent);
                 data = webClient.DownloadString(url);
+
+
+                if (data.Replace("\n", "").Replace("\n", "").Trim() == "[]") {
+                    LogFile.AddMessage("No Releases available.");
+                    return;
+                }
+
                 latestVersion = Program.GetStringAfter("tag_name", data);
                 updateUrl =     Program.GetStringAfter("browser_download_url", data);
                 releaseBody =   Program.EscapeString(Program.GetStringAfter("body", data));
@@ -1394,7 +1401,7 @@ namespace HedgeModManager
 
         private void ReportLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("https://github.com/thesupersonic16/HedgeModManager/issues/new");
+            Process.Start("https://github.com/marcussacana/HedgeModManager/issues/new");
         }
 
         private void ModsList_SelectedIndexChanged(object sender, EventArgs e)

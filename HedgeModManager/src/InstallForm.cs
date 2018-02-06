@@ -24,65 +24,93 @@ namespace HedgeModManager
         public static List<Entry> FindGames()
         {
             var entries = new List<Entry>();
-            var paths = new List<string>();
+            var paths = new List<string>() {
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
+                Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                AppDomain.CurrentDomain.BaseDirectory
+            };
 
             string vdfLocation = Path.Combine(Steam.SteamLocation, "steamapps\\libraryfolders.vdf");
-            LogFile.AddMessage($"Reading VDF: {vdfLocation}");
-            Steam.VDFFile vdf = null;
-            try
-            {
-                vdf = Steam.VDFFile.ReadVDF(vdfLocation);
-            }catch(Exception ex)
-            {
-                MainForm.AddMessage("Exception thrown while reading Steam's VDF file.", ex,
-                $"VDFPath: {vdfLocation}");
+            if (File.Exists(vdfLocation)) {
+                LogFile.AddMessage($"Reading VDF: {vdfLocation}");
+                Steam.VDFFile vdf = null;
+                try {
+                    vdf = Steam.VDFFile.ReadVDF(vdfLocation);
+                } catch (Exception ex) {
+                    MainForm.AddMessage("Exception thrown while reading Steam's VDF file.", ex,
+                    $"VDFPath: {vdfLocation}");
+                }
+
+                // Default Common Path
+                paths.Add(Path.Combine(Steam.SteamLocation, "steamapps\\common"));
+
+                // Gets all the custom libraries
+                foreach (var library in vdf.Array.Elements)
+                    if (int.TryParse(library.Key, out int index))
+                        paths.Add(Path.Combine(library.Value.Value, "steamapps\\common"));
             }
-
-            // Default Common Path
-            paths.Add(Path.Combine(Steam.SteamLocation, "steamapps\\common"));
-
-            // Gets all the custom libraries
-            foreach (var library in vdf.Array.Elements)
-                if (int.TryParse(library.Key, out int index))
-                    paths.Add(Path.Combine(library.Value.Value, "steamapps\\common"));
             
             foreach (string path in paths)
                 if (Directory.Exists(path))
                 {
                     string lwPath = Path.Combine(path, "Sonic Lost World\\slw.exe");
+                    string lwPath2 = Path.Combine(path, "SonicLostWorld\\slw.exe");
+                    string lwPath3 = Path.Combine(path, "slw.exe");
+
                     string gensPath = Path.Combine(path, "Sonic Generations\\SonicGenerations.exe");
+                    string gensPath2 = Path.Combine(path, "SonicGenerations\\SonicGenerations.exe");
+                    string gensPath3 = Path.Combine(path, "SonicGenerations.exe");
+
                     string forcesPath = Path.Combine(path, "SonicForces\\build\\main\\projects\\exec\\Sonic Forces.exe");
-                    if (CheckGameAndSupport(lwPath))
+                    string forcesPath2 = Path.Combine(path, "Sonic Forces\\build\\main\\projects\\exec\\Sonic Forces.exe");
+                    string forcesPath3 = Path.Combine(path, "build\\main\\projects\\exec\\Sonic Forces.exe");
+
+                    if (CheckGameAndSupport(lwPath) && !ContainsPath(lwPath, entries))
                         entries.Add(new Entry() { GameName = "Sonic Lost World", Path = lwPath });
-                    if (CheckGameAndSupport(gensPath))
+                    else if (CheckGameAndSupport(lwPath2) && !ContainsPath(lwPath2, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Lost World", Path = lwPath2 });
+                    else if (CheckGameAndSupport(lwPath3) && !ContainsPath(lwPath3, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Lost World", Path = lwPath3 });
+
+
+                    if (CheckGameAndSupport(gensPath) && !ContainsPath(gensPath, entries))
                         entries.Add(new Entry() { GameName = "Sonic Generations", Path = gensPath });
-                    if (CheckGameAndSupport(forcesPath))
+                    else if (CheckGameAndSupport(gensPath2) && !ContainsPath(gensPath2, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Generations", Path = gensPath2 });
+                    else if (CheckGameAndSupport(gensPath3) && !ContainsPath(gensPath3, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Generations", Path = gensPath3 });
+                    
+
+                    if (CheckGameAndSupport(forcesPath) && !ContainsPath(forcesPath, entries))
                         entries.Add(new Entry() { GameName = "Sonic Forces", Path = forcesPath });
+                    if (CheckGameAndSupport(forcesPath2) && !ContainsPath(forcesPath2, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Forces", Path = forcesPath2 });
+                    if (CheckGameAndSupport(forcesPath3) && !ContainsPath(forcesPath3, entries))
+                        entries.Add(new Entry() { GameName = "Sonic Forces", Path = forcesPath3 });
                 }
             return entries;
         }
 
+        private static bool ContainsPath(string forcesPath, List<Entry> entries) {
+            return (from x in entries where x.Path == forcesPath select x).Count() != 0;
+        }
+
         public static bool CheckGameAndSupport(string path)
         {
-            return File.Exists(path) && !(
-                File.Exists(Path.Combine(Path.GetDirectoryName(path), "steamclient64.dll")) ||
-                File.Exists(Path.Combine(Path.GetDirectoryName(path), "steamclient.dll")));
+            return File.Exists(path);
         }
 
         private void InstallForm_Load(object sender, EventArgs e)
         {
-            try
-            {
+            try {
                 Steam.Init();
-            }
-            catch (Exception ex)
-            {
-                MainForm.AddMessage("Exception thrown while Finding Steam", ex);
-            }
+            } catch { }
 
             if (Steam.SteamLocation == null)
             {
-                MainForm.AddMessageToUser($"Steam is not Setup correctly, " +
+                LogFile.AddMessage($"Steam is not Setup correctly, " +
                     $"Please report this issue to {Program.ProgramName}'s GitHub Page with {Program.ProgramName}.log\n" +
                     $"Please copy all files that came with {Program.ProgramName} into your Game folder. Exiting...");
             }

@@ -1,4 +1,4 @@
-﻿# No idea why this line is not executing. Random byte at the start?
+﻿# No idea why this line is not executing. Random byte at the start?; It's the UTF-8 BOM retard
 REM 
 @echo off
 REM Clears the Screen

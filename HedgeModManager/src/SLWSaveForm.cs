@@ -1,21 +1,14 @@
-﻿using Microsoft.Win32;
-using SS16;
+﻿using SS16;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace HedgeModManager
-{
+namespace HedgeModManager {
     public partial class SLWSaveForm : Form
     {
 
@@ -56,18 +49,20 @@ namespace HedgeModManager
         
         public Bitmap DownloadSteamProfilePicture(WebClient webClient, string SID)
         {
-            string url = "http://steamcommunity.com/profiles/" + SID;
-            string PIURL = @"steamstatic.com/steamcommunity/public/images";
-            url = webClient.DownloadString(url);
-            url = Program.GetString(url.Substring(0, url.IndexOf(PIURL)).LastIndexOf('\"') - 1, url);
-            return new Bitmap(new MemoryStream(webClient.DownloadData(url)));
+            try {
+                string url = "http://steamcommunity.com/profiles/" + SID;
+                string PIURL = @"steamstatic.com/steamcommunity/public/images";
+                url = webClient.DownloadString(url);
+                url = Program.GetString(url.Substring(0, url.IndexOf(PIURL)).LastIndexOf('\"') - 1, url);
+                return new Bitmap(new MemoryStream(webClient.DownloadData(url)));
+            } catch {
+                return new Bitmap(40, 40);
+            }
         }
 
-        private void SLWSaveForm_Load(object sender, EventArgs e)
-        {
+        private void SLWSaveForm_Load(object sender, EventArgs e) {
             // Sets up this ImageList
-            listView1.LargeImageList = new ImageList()
-            {
+            listView1.LargeImageList = new ImageList() {
                 ImageSize = new Size(64, 64),
                 ColorDepth = ColorDepth.Depth32Bit
             };
@@ -77,19 +72,15 @@ namespace HedgeModManager
                 Theme.ApplyDarkThemeToAll(this);
 
             // Checks if the Key and Value exists.
-            if (Steam.SteamLocation != null)
-            {
+            if (Steam.SteamLocation != null) {
                 // Checks if "loginusers.vdf" exists.
-                if (File.Exists(Path.Combine(Steam.SteamLocation, "config\\loginusers.vdf")))
-                {
+                if (File.Exists(Path.Combine(Steam.SteamLocation, "config\\loginusers.vdf"))) {
                     // loginusers.vdf
                     var file = Steam.VDFFile.ReadVDF(Path.Combine(Steam.SteamLocation, "config\\loginusers.vdf"));
-                    foreach (var pair in file.Array.Elements.ToList())
-                    {
+                    foreach (var pair in file.Array.Elements.ToList()) {
                         // Adds ListViewItem
                         var array = pair.Value as Steam.VDFFile.VDFArray;
-                        var lvi = new ListViewItem(array.Elements["PersonaName"].Value as string)
-                        {
+                        var lvi = new ListViewItem(array.Elements["PersonaName"].Value as string) {
                             ImageKey = array.Name
                         };
                         // Adds the SID to the SID list
@@ -100,9 +91,11 @@ namespace HedgeModManager
                 // Gets the icons in another thread
                 imageThread = new Thread(new ThreadStart(GetAndApplyImages));
                 imageThread.Start();
-            }else
-            {
-                Close();
+            } else {
+                var lvi = new ListViewItem("CPY");
+
+                SIDs.Add("CPY");
+                listView1.Items.Add(lvi);
             }
         }
 
